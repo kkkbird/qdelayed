@@ -32,7 +32,7 @@ type DelayedTestSuite struct {
 
 func (s *DelayedTestSuite) SetupSuite() {
 	viper.SetDefault("redis.url", "192.168.0.106:6379")
-	viper.SetDefault("redis.password", "redisPassword")
+	viper.SetDefault("redis.password", "sharkNo1")
 
 	s.redisDB = redis.NewClient(&redis.Options{
 		Addr:     viper.GetString("redis.url"),
@@ -218,7 +218,7 @@ func TestDelayed(t *testing.T) {
 
 func BenchmarkSteamRead(b *testing.B) {
 	viper.SetDefault("redis.url", "192.168.0.106:6379")
-	viper.SetDefault("redis.password", "redisPassword")
+	viper.SetDefault("redis.password", "sharkNo1")
 
 	redisDB := redis.NewClient(&redis.Options{
 		Addr:     viper.GetString("redis.url"),

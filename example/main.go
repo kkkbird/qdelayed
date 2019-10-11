@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/kkkbird/qdelayed"
-	log "github.com/kkkbird/qlog"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -14,8 +14,8 @@ const (
 
 func main() {
 	redisdb := redis.NewClient(&redis.Options{
-		Addr:     "192.168.0.106:6379",
-		Password: "sharkNo1",
+		Addr:     "192.168.1.231:31329",
+		Password: "kuyiNo1",
 		DB:       0,
 	})
 	defer redisdb.Close()
@@ -25,6 +25,7 @@ func main() {
 	delayed := qdelayed.NewRedisDelayed(redisdb, "mydelayed")
 
 	delayed.Add(delayDuration, testData)
+
 	log.Infof("Message delayed, you could see the message after %d second(s)", delayDuration/time.Second)
 
 	done := make(chan struct{})

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 
-	log "github.com/kkkbird/qlog"
+	log "github.com/sirupsen/logrus"
 )
 
 type SimpleData struct {

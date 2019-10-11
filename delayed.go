@@ -182,7 +182,7 @@ func NewRedisDelayed(db *redis.Client, key string, opts ...RedisOpts) QDelayed {
 		db:           db,
 		key:          key,
 		pollInterval: defaultPollInterval,
-		uuidGen:      quuid.New(),
+		uuidGen:      quuid.New(quuid.WithHWAddressPrefix),
 	}
 
 	for _, opt := range opts {

@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	"github.com/kkkbird/qdelayed"
 	log "github.com/sirupsen/logrus"
 )

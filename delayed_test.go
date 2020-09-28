@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 
@@ -51,12 +51,12 @@ func (s *DelayedTestSuite) TestSimple() {
 	testData := "aaa"
 	testData2 := "bbb"
 	delayed := NewRedisDelayed(s.redisDB, s.key)
-	delayed.Add(time.Second, testData, testData2)
+	delayed.Add(context.Background(), time.Second, testData, testData2)
 
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		rlt, err := delayed.Read(0, 10)
+		rlt, err := delayed.Read(context.Background(), 0, 10)
 		if !s.NoError(err) {
 			return
 		}
@@ -86,12 +86,12 @@ func (s *DelayedTestSuite) TestAdd() {
 		Message: "Goodby moon",
 	}
 	delayed := NewRedisDelayed(s.redisDB, s.key)
-	delayed.Add(3*time.Second, testData, testData2)
+	delayed.Add(context.Background(), 3*time.Second, testData, testData2)
 }
 
 func (s *DelayedTestSuite) TestRead() {
 	delayed := NewRedisDelayed(s.redisDB, s.key)
-	n, err := delayed.Read(time.Second, 2)
+	n, err := delayed.Read(context.Background(), time.Second, 2)
 
 	if err != redis.Nil && !s.NoError(err) {
 		return
@@ -103,7 +103,7 @@ func (s *DelayedTestSuite) TestRead() {
 
 func (s *DelayedTestSuite) TestReadUnmarshal() {
 	delayed := NewRedisDelayed(s.redisDB, s.key, WithUnmarshalType(reflect.TypeOf(SimpleData{})))
-	n, err := delayed.Read(time.Second, 2)
+	n, err := delayed.Read(context.Background(), time.Second, 2)
 
 	if err != redis.Nil && !s.NoError(err) {
 		return
@@ -119,6 +119,7 @@ func (s *DelayedTestSuite) TestReadUnmarshal() {
 }
 
 func (s *DelayedTestSuite) TestRead2() {
+	ctx := context.Background()
 	delayed := NewRedisDelayed(s.redisDB, s.key, WithUnmarshalType(reflect.TypeOf(SimpleData{})))
 
 	done := make(chan struct{})
@@ -130,9 +131,9 @@ func (s *DelayedTestSuite) TestRead2() {
 				Message: "Hello world",
 			}
 			if i < 5 {
-				delayed.Add(time.Duration(5-i)*time.Second, testData)
+				delayed.Add(ctx, time.Duration(5-i)*time.Second, testData)
 			} else {
-				delayed.Add(time.Second, testData)
+				delayed.Add(ctx, time.Second, testData)
 			}
 			time.Sleep(time.Second)
 		}
@@ -148,7 +149,7 @@ func (s *DelayedTestSuite) TestRead2() {
 				return
 			default:
 				log.Info("start read")
-				n, err := delayed.Read(time.Second*10, 2)
+				n, err := delayed.Read(ctx, time.Second*10, 2)
 
 				if err != nil && err != redis.Nil {
 					log.Infof("read error: %s", err)
@@ -168,6 +169,7 @@ func (s *DelayedTestSuite) TestRead2() {
 }
 
 func (s *DelayedTestSuite) TestRead3() {
+	ctx := context.Background()
 	delayed := NewRedisDelayed(s.redisDB, s.key, WithUnmarshalType(reflect.TypeOf(SimpleData{})))
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -179,9 +181,9 @@ func (s *DelayedTestSuite) TestRead3() {
 				Message: "Hello world",
 			}
 			if i < 5 {
-				delayed.Add(time.Duration(5-i)*time.Second, testData)
+				delayed.Add(ctx, time.Duration(5-i)*time.Second, testData)
 			} else {
-				delayed.Add(time.Second, testData)
+				delayed.Add(ctx, time.Second, testData)
 			}
 			time.Sleep(time.Second)
 		}
@@ -196,7 +198,7 @@ func (s *DelayedTestSuite) TestRead3() {
 			return
 		default:
 			log.Info("start read")
-			n, err := delayed.ReadWithContext(ctx, 10)
+			n, err := delayed.Read(ctx, 0, 10)
 
 			if err != nil && err != redis.Nil {
 				log.Infof("read error: %s", err)

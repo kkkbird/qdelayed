@@ -10,9 +10,10 @@ refer to: https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application
 package main
 
 import (
+	"context"
 	"time"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	"github.com/kkkbird/qdelayed"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,16 +32,18 @@ func main() {
 
 	testData := "Hello world"
 
+	ctx := context.Background()
+
 	delayed := qdelayed.NewRedisDelayed(redisdb, "mydelayed")
 
-	delayed.Add(delayDuration, testData)
+	delayed.Add(ctx, delayDuration, testData)
 
 	log.Infof("Message delayed, you could see the message after %d second(s)", delayDuration/time.Second)
 
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		rlt, err := delayed.Read(0, 10)
+		rlt, err := delayed.Read(ctx, 0, 10)
 
 		if err != nil { // will not return redis.Nil if block 0
 			log.WithError(err).Infof("qdelayed read error")
@@ -67,7 +70,3 @@ INFO[0000] Message delayed, you could see the message after 3 second(s)
 INFO[0003] 0, Hello world
 INFO[0003] Done
 ```
-
-## tips
-
-1. use `ReadWithContext` instead of `Read` to make full use of go context

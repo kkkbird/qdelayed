@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	"github.com/kkkbird/quuid"
 )
 
@@ -31,10 +31,9 @@ type DelayedResult struct {
 
 // QDelayed qdelayed interface
 type QDelayed interface {
-	ReadWithContext(ctx context.Context, count int) ([]DelayedResult, error)
-	Read(block time.Duration, count int) ([]DelayedResult, error)
-	Add(delay time.Duration, data ...interface{}) error
-	AddByDeadline(d time.Time, data ...interface{}) error
+	Read(ctx context.Context, block time.Duration, count int) ([]DelayedResult, error)
+	Add(ctx context.Context, delay time.Duration, data ...interface{}) error
+	AddByDeadline(ctx context.Context, d time.Time, data ...interface{}) error
 }
 
 // QRedisDelayed qdelay redis implementation
@@ -51,7 +50,7 @@ func (r *QRedisDelayed) uuid() string {
 }
 
 // AddByDeadline add a delayed entry by deadline
-func (r *QRedisDelayed) AddByDeadline(d time.Time, data ...interface{}) error {
+func (r *QRedisDelayed) AddByDeadline(ctx context.Context, d time.Time, data ...interface{}) error {
 	if len(data) == 0 {
 		return ErrNoData
 	}
@@ -77,14 +76,14 @@ func (r *QRedisDelayed) AddByDeadline(d time.Time, data ...interface{}) error {
 		// add uuid to make all member member
 		members[i] = &redis.Z{Score: score, Member: id + ":" + string(member)}
 	}
-	r.db.ZAdd(r.key, members...)
+	r.db.ZAdd(ctx, r.key, members...)
 
 	return nil
 }
 
 // Add add a delayed entry by delay duration
-func (r *QRedisDelayed) Add(delay time.Duration, data ...interface{}) error {
-	return r.AddByDeadline(time.Now().Add(delay), data...)
+func (r *QRedisDelayed) Add(ctx context.Context, delay time.Duration, data ...interface{}) error {
+	return r.AddByDeadline(ctx, time.Now().Add(delay), data...)
 }
 
 var zpopByScore = redis.NewScript(`
@@ -97,14 +96,14 @@ else
 end
 `)
 
-func (r *QRedisDelayed) ReadWithContext(ctx context.Context, count int) ([]DelayedResult, error) {
+func (r *QRedisDelayed) readWithContext(ctx context.Context, count int) ([]DelayedResult, error) {
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(ctx)
 	defer cancel()
 
 	for {
 		nowTs := time.Now().UnixNano()
-		m, err := zpopByScore.Run(r.db, []string{r.key}, nowTs, count).Result() // read will return redis.Nil if there is
+		m, err := zpopByScore.Run(ctx, r.db, []string{r.key}, nowTs, count).Result() // read will return redis.Nil if there is no entry
 
 		if err == nil {
 			messages := m.([]interface{})
@@ -132,7 +131,10 @@ func (r *QRedisDelayed) ReadWithContext(ctx context.Context, count int) ([]Delay
 			}
 
 			return rlt, err
+		} else if err == context.DeadlineExceeded {
+			return nil, redis.Nil
 		}
+
 		if err != redis.Nil {
 			return nil, err
 		}
@@ -147,8 +149,7 @@ func (r *QRedisDelayed) ReadWithContext(ctx context.Context, count int) ([]Delay
 	}
 }
 
-func (r *QRedisDelayed) Read(block time.Duration, count int) ([]DelayedResult, error) {
-	ctx := context.Background()
+func (r *QRedisDelayed) Read(ctx context.Context, block time.Duration, count int) ([]DelayedResult, error) {
 	var cancel context.CancelFunc
 
 	if block > 0 {
@@ -156,7 +157,7 @@ func (r *QRedisDelayed) Read(block time.Duration, count int) ([]DelayedResult, e
 		defer cancel()
 	}
 
-	return r.ReadWithContext(ctx, count)
+	return r.readWithContext(ctx, count)
 }
 
 // RedisOpts is setters for application options

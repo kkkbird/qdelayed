@@ -4,9 +4,9 @@ a delay queue base on redis zset
 
 refer to: https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-4-task-queues/6-4-2-delayed-tasks/
 
-# example 
+## example
 
-``` golang
+```golang
 package main
 
 import (
@@ -65,7 +65,7 @@ func main() {
 }
 ```
 
-``` shell
+```shell
 INFO[0000] Message delayed, you could see the message after 3 second(s)
 INFO[0003] 0, Hello world
 INFO[0003] Done

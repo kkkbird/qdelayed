@@ -1,13 +1,15 @@
-module github.com/kkkbird/qdelayed
+module github.com/dirkm/qdelayed
 
 go 1.17
 
 require (
 	github.com/go-redis/redis/v8 v8.11.3
+	github.com/go-redis/redis/v9 v9.0.0-rc.1
+	github.com/kkkbird/qdelayed v0.0.0-20210927080705-29957531a7e7
 	github.com/kkkbird/quuid v0.0.0-20210927080042-a29962956d1c
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
@@ -25,9 +27,11 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	golang.org/x/sys v0.0.0-20210927052749-1cf2251ac284 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/kkkbird/qdelayed => ./

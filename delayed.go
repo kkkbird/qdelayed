@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v9"
 	"github.com/kkkbird/quuid"
 )
 
@@ -55,7 +55,7 @@ func (r *QRedisDelayed) AddByDeadline(ctx context.Context, d time.Time, data ...
 		return ErrNoData
 	}
 	score := float64(d.UnixNano())
-	members := make([]*redis.Z, len(data))
+	members := make([]redis.Z, len(data))
 
 	for i, d := range data {
 		// if r.unmarshalType != nil && reflect.TypeOf(data[i]) != r.unmarshalType {
@@ -74,7 +74,7 @@ func (r *QRedisDelayed) AddByDeadline(ctx context.Context, d time.Time, data ...
 			member = string(jstr)
 		}
 		// add uuid to make all member member
-		members[i] = &redis.Z{Score: score, Member: id + ":" + string(member)}
+		members[i] = redis.Z{Score: score, Member: id + ":" + member}
 	}
 	r.db.ZAdd(ctx, r.key, members...)
 

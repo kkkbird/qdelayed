@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v9"
 	"github.com/kkkbird/qdelayed"
 	log "github.com/sirupsen/logrus"
 )

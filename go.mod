@@ -1,4 +1,4 @@
-module github.com/dirkm/qdelayed
+module github.com/kkkbird/qdelayed
 
 go 1.17
 
@@ -34,4 +34,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/kkkbird/qdelayed => ./

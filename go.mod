@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
-	github.com/kkkbird/qdelayed v0.0.0-20210927080705-29957531a7e7
 	github.com/kkkbird/quuid v0.0.0-20210927080042-a29962956d1c
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/kkkbird/qdelayed"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 

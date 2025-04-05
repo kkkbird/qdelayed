@@ -6,7 +6,7 @@ toolchain go1.23.0
 
 require (
 	github.com/kkkbird/quuid v0.0.0-20230902073044-dcb52c3b307c
-	github.com/redis/go-redis/v9 v9.6.1
+	github.com/redis/go-redis/v9 v9.6.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0

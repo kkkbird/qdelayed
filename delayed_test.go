@@ -125,7 +125,7 @@ func (s *DelayedTestSuite) TestRead2() {
 	done := make(chan struct{})
 	done2 := make(chan struct{})
 	go func() {
-		for i := 0; i < 10; i++ {
+		for i := range 10 {
 			testData := &SimpleData{
 				ID:      strconv.Itoa(i),
 				Message: "Hello world",
@@ -175,7 +175,7 @@ func (s *DelayedTestSuite) TestRead3() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
-		for i := 0; i < 10; i++ {
+		for i := range 10 {
 			testData := &SimpleData{
 				ID:      strconv.Itoa(i),
 				Message: "Hello world",

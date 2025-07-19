@@ -19,8 +19,8 @@ const (
 
 // qdelayed predefined error
 var (
-	ErrNoData           = errors.New("No data")
-	ErrDataTypeMismatch = errors.New("Data type mismatch")
+	ErrNoData           = errors.New("no data")
+	ErrDataTypeMismatch = errors.New("data type mismatch")
 )
 
 // DelayedResult is struct for qdelayed result
@@ -97,20 +97,17 @@ end
 `)
 
 func (r *QRedisDelayed) readWithContext(ctx context.Context, count int) ([]DelayedResult, error) {
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithCancel(ctx)
-	defer cancel()
-
 	for {
 		nowTs := time.Now().UnixNano()
 		m, err := zpopByScore.Run(ctx, r.db, []string{r.key}, nowTs, count).Result() // read will return redis.Nil if there is no entry
 
-		if err == nil {
+		switch err {
+		case nil:
 			messages := m.([]interface{})
 			length := len(messages) >> 1
 			rlt := make([]DelayedResult, length)
 
-			for i := 0; i < length; i++ {
+			for i := range length {
 				// remove uuid
 				sData := strings.SplitN(messages[i*2].(string), ":", 2)[1]
 
@@ -131,20 +128,18 @@ func (r *QRedisDelayed) readWithContext(ctx context.Context, count int) ([]Delay
 			}
 
 			return rlt, err
-		} else if err == context.DeadlineExceeded {
+		case context.DeadlineExceeded:
 			return nil, redis.Nil
-		}
-
-		if err != redis.Nil {
+		case redis.Nil:
+			select {
+			case <-time.After(r.pollInterval):
+			case <-ctx.Done():
+				//return nil, ctx.Err()
+				return nil, redis.Nil
+			}
+		default:
+			// unexpect error
 			return nil, err
-		}
-		// err == redis.Nil
-
-		select {
-		case <-time.After(r.pollInterval):
-		case <-ctx.Done():
-			//return nil, ctx.Err()
-			return nil, redis.Nil
 		}
 	}
 }
